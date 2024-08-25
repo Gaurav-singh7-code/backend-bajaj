@@ -1,72 +1,61 @@
-// const express = require('express');
-// const app = express();
-
-// app.use(express.json());
-
-// app.post('/bfhl', (req, res) => {
-//     const { data } = req.body;
-
-//     const numbers = data.filter(item => !isNaN(item));
-//     const alphabets = data.filter(item => isNaN(item));
-
-//     const lowercaseAlphabets = alphabets.filter(char => char === char.toLowerCase());
-//     const highestLowercaseAlphabet = lowercaseAlphabets.sort().slice(-1);
-
-//     res.json({
-//         is_success: true,
-//         user_id: "gaurav_singh_18032003",
-//         email: "gaurav.singh2021a@vitstudent.ac.in",
-//         roll_number: "21BCE0379",
-//         numbers,
-//         alphabets,
-//         highest_lowercase_alphabet: highestLowercaseAlphabet
-//     });
-// });
-
-// app.get('/bfhl', (req, res) => {
-//     res.status(200).json({ operation_code: 1 });
-// });
-
-// const PORT = process.env.PORT || 5000;
-// app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
-
-
-
 const express = require('express');
+const bodyParser = require('body-parser');
+const cors = require('cors');
+
+
 const app = express();
+app.use(bodyParser.json());
+app.use(cors());
+const userId = "gaurav_singh_18032003"; 
+const email = "gaurav.singh2021a@vitstudent.ac.in";
+const rollNumber = "21BCE0379";
 
-app.use(express.json());
-
+// POST Method Endpoint
 app.post('/bfhl', (req, res) => {
-    const { data } = req.body;
-
+    const data = req.body.data;
     if (!data || !Array.isArray(data)) {
         return res.status(400).json({
             is_success: false,
-            message: 'Invalid input format'
+            message: 'Invalid input, array expected in the request body'
         });
     }
 
-    const numbers = data.filter(item => !isNaN(item));
-    const alphabets = data.filter(item => isNaN(item));
+    const numbers = [];
+    const alphabets = [];
+    let highestLowercaseAlphabet = null;
 
-    const lowercaseAlphabets = alphabets.filter(char => char === char.toLowerCase());
-    const highestLowercaseAlphabet = lowercaseAlphabets.sort().slice(-1);
+    for (const item of data) {
+        if (!isNaN(item)) {
+            numbers.push(item);
+        } else if (typeof item === 'string') {
+            alphabets.push(item);
+            if (item >= 'a' && item <= 'z') {
+                if (!highestLowercaseAlphabet || item > highestLowercaseAlphabet) {
+                    highestLowercaseAlphabet = item;
+                }
+            }
+        }
+    }
 
     res.json({
         is_success: true,
-        user_id: "gaurav_singh_18032003",
-        email: "gaurav.singh2021a@vitstudent.ac.in",
-        roll_number: "21BCE0379",
-        numbers,
-        alphabets,
-        highest_lowercase_alphabet: highestLowercaseAlphabet
+        user_id: userId,
+        email: email,
+        roll_number: rollNumber,
+        numbers: numbers,
+        alphabets: alphabets,
+        highest_lowercase_alphabet: highestLowercaseAlphabet ? [highestLowercaseAlphabet] : []
     });
 });
 
+// GET Method Endpoint
 app.get('/bfhl', (req, res) => {
-    res.status(200).json({ operation_code: 1 });
+    res.status(200).json({
+        operation_code: 1
+    });
 });
 
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+app.listen(PORT, () => {
+    console.log(`Server is running on port ${PORT}`);
+});
